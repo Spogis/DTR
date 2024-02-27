@@ -116,12 +116,10 @@ def RunDTR(list_of_contents, list_of_names):
     if list_of_contents is not None:
         Dataset = parse_contents(list_of_contents, list_of_names)
 
-    texto_informacoes, texto_informacoes2, fig = GeraGrafico(Dataset)
+    texto_informacoes, fig = GeraGrafico(Dataset)
 
     style = {'width': '100%', 'justifyContent': 'center', 'margin-right': '20px', 'margin-left': '20px'}
     style2 = {'width': '100%', 'justifyContent': 'center', 'margin-right': '20px', 'margin-left': '20px'}
-
-    texto_informacoes = texto_informacoes + texto_informacoes2
 
     return texto_informacoes, fig, style, style2
 

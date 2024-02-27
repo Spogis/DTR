@@ -78,11 +78,10 @@ def GeraGrafico(Dataset):
     texto_informacoes += f"Variância do tempo de residência: {variancia:.2f}\n"
     texto_informacoes += f"Desvio padrão do tempo de residência: {desvio_padrao:.2f}\n"
     texto_informacoes += f"Skewness do tempo de residência: {skewness:.2f}\n\n"
-
-    texto_informacoes2 = f"Volume de mistura: {percentual_mistura * 100:.2f}%\n"
-    texto_informacoes2 += f"Volume de bypass (tempos < tm - 2*SD): {percentual_bypass * 100:.2f}%\n"
-    texto_informacoes2 += f"Volume pistonado: {percentual_pistonado * 100:.2f}%\n"
-    texto_informacoes2 += f"Volume morto (tempos > tm + 2*SD): {percentual_volume_morto * 100:.2f}%"
+    texto_informacoes += f"Volume de mistura: {percentual_mistura * 100:.2f}%\n"
+    texto_informacoes += f"Volume de bypass (tempos < tm - 2*SD): {percentual_bypass * 100:.2f}%\n"
+    texto_informacoes += f"Volume pistonado: {percentual_pistonado * 100:.2f}%\n"
+    texto_informacoes += f"Volume morto (tempos > tm + 2*SD): {percentual_volume_morto * 100:.2f}%"
 
 
     #plot_pearson_distribution(tm, variancia, skewness, tempo_novos)
@@ -127,7 +126,7 @@ def GeraGrafico(Dataset):
                       yaxis_title='E(t)',
                       title_x=0.5)
 
-    return texto_informacoes, texto_informacoes2, fig
+    return texto_informacoes, fig
 
 def plot_pearson_distribution(mean, variance, skewness, tempo_novos):
     import numpy as np
