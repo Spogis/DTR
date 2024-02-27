@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
+import plotly.graph_objects as go
+from dash import dcc
 
 import matplotlib as mpl
 mpl.use('Agg')
@@ -70,37 +72,8 @@ def GeraGrafico(Dataset):
     percentual_total_identificado = percentual_pistonado + percentual_volume_morto + percentual_bypass
     percentual_mistura = 1 - percentual_total_identificado  # Restante não classificado explicitamente
 
-    # Visualização da Curva de DTR com indicação de volume morto
 
-    plt.figure(figsize=(10, 6))
-
-    plt.plot(tempo, dtr, label='DTR')
-    # plt.axvline(x=limite_inferior_pistonado, color='r', linestyle='--', label='Limite Inferior Pistonado')
-    # plt.axvline(x=limite_superior_pistonado, color='r', linestyle='--', label='Limite Superior Pistonado')
-    # plt.axvline(x=limite_superior_volume_morto, color='g', linestyle='--', label='Limite Superior Volume Morto')
-
-    # Preenchendo a área entre os limites do volume de mistura
-    plt.fill_between(tempo, dtr, where=((tempo >= limite_inferior_bypass) & (tempo <= limite_inferior_pistonado) | (tempo >= limite_superior_pistonado) & (tempo <= limite_superior_volume_morto)), color='green', alpha=0.1, label='Volume de Mistura')
-
-    # Preenchendo a área entre os limites do volume de Bypass
-    plt.fill_between(tempo, dtr, where=(tempo <= limite_inferior_bypass), color='yellow', alpha=0.1, label='Volume de Bypass')
-
-    # Preenchendo a área entre os limites do volume pistonado
-    plt.fill_between(tempo, dtr, where=(tempo >= limite_inferior_pistonado) & (tempo <= limite_superior_pistonado), color='red', alpha=0.1, label='Volume Pistonado')
-
-    # Preenchendo a área entre os limites do volume morto
-    plt.fill_between(tempo, dtr, where=(tempo >= limite_superior_volume_morto), color='blue', alpha=0.1, label='Volume Morto')
-
-    plt.xlabel('Tempo')
-    plt.ylabel('E(t)')
-    plt.title('Análise de Distribuição de Tempo de Residência (DTR)')
-    plt.legend()
-
-    # Limitando o eixo x e y a começar em zero
-    plt.ylim(bottom=0)
-    plt.xlim(left=0)
-
-    # Preparando o texto a ser adicionado abaixo da legenda
+    # Preparando o texto a ser retornado
     texto_informacoes = f"Tempo médio de residência: {tm:.2f}\n"
     texto_informacoes += f"Variância do tempo de residência: {variancia:.2f}\n"
     texto_informacoes += f"Desvio padrão do tempo de residência: {desvio_padrao:.2f}\n"
@@ -112,13 +85,49 @@ def GeraGrafico(Dataset):
     texto_informacoes2 += f"Volume morto (tempos > tm + 2*SD): {percentual_volume_morto * 100:.2f}%"
 
 
-    figure_file = 'assets/DTR_Plots/DTR.png'
-    plt.savefig(figure_file)
-    plt.close()
-
     #plot_pearson_distribution(tm, variancia, skewness, tempo_novos)
 
-    return texto_informacoes, texto_informacoes2
+
+########################################################################################################################
+    # Criando a figura com Plotly
+    fig = go.Figure()
+
+    # Adicionando a linha DTR
+    fig.add_trace(go.Scatter(x=tempo, y=dtr, mode='lines', name='DTR', line=dict(color='black')))
+
+    # Para adicionar preenchimentos condicionais, precisamos segmentar os dados manualmente.
+
+    # Volume de Bypass
+    idx_bypass = tempo <= limite_inferior_bypass
+    fig.add_trace(go.Scatter(x=tempo[idx_bypass], y=dtr[idx_bypass], mode='none', fill='tozeroy',
+                             fillcolor='rgba(255, 255, 0, 0.5)', name='Volume de Bypass'))
+
+    # Volume de Mistura
+    idx_mistura1 = (tempo >= limite_inferior_bypass) & (tempo <= limite_inferior_pistonado)
+    fig.add_trace(go.Scatter(x=tempo[idx_mistura1], y=dtr[idx_mistura1], mode='none',
+                             fill='tozeroy', fillcolor='rgba(0, 255, 0, 0.5)', name='Volume de Mistura'))
+
+    idx_mistura2 = (tempo >= limite_superior_pistonado) & (tempo <= limite_superior_volume_morto)
+    fig.add_trace(go.Scatter(x=tempo[idx_mistura2], y=dtr[idx_mistura2], mode='none', showlegend=False,
+                             fill='tozeroy', fillcolor='rgba(0, 255, 0, 0.5)', name='Volume de Mistura'))
+
+    # Volume Pistonado
+    idx_pistonado = np.where((tempo >= limite_inferior_pistonado) & (tempo <= limite_superior_pistonado))[0]
+    fig.add_trace(go.Scatter(x=tempo[idx_pistonado], y=dtr[idx_pistonado], mode='none', fill='tozeroy',
+                             fillcolor='rgba(255, 0, 0, 0.5)', name='Volume Pistonado'))
+
+    # Volume Morto
+    idx_volume_morto = tempo >= limite_superior_volume_morto
+    fig.add_trace(go.Scatter(x=tempo[idx_volume_morto], y=dtr[idx_volume_morto], mode='none', fill='tozeroy',
+                             fillcolor='rgba(0, 0, 255, 0.5)', name='Volume Morto'))
+
+    # Atualizando os layouts do gráfico
+    fig.update_layout(title='Análise de Distribuição de Tempo de Residência (DTR)',
+                      xaxis_title='Tempo',
+                      yaxis_title='E(t)',
+                      title_x=0.5)
+
+    return texto_informacoes, texto_informacoes2, fig
 
 def plot_pearson_distribution(mean, variance, skewness, tempo_novos):
     import numpy as np
