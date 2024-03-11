@@ -1,4 +1,3 @@
-
 # DTR
 
 ## Introduction - Importance DTR in Chemical Engineering
@@ -23,13 +22,13 @@ To install the necessary dependencies, you need to have Python installed on your
 
 1. **Clone the Repository**
 
-   First, clone the Easy Curve Fit repository to your local machine.
+   First, clone the DTR repository to your local machine.
 
 2. **Install Dependencies**
 
    Inside the project directory, there is a file called `requirements.txt` that contains all the necessary libraries. To install them, execute the following command: **pip install -r requirements.txt**
 
-   This will install all the necessary dependencies to run Easy Curve Fit.
+   This will install all the necessary dependencies to run DTR.
 
 ## Execution
 
